@@ -1,18 +1,18 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname wp_2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
-;;wp_2 includes the following exercises:
-;;Exercise 43
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname wp_sine) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;;wp_sine includes no exercises
 
 (require 2htdp/image)
 (require 2htdp/universe)
 
-(define WIDTH-OF-WORLD 800)
-(define HEIGHT-OF-WORLD 50)
+;; physical constants
+(define WIDTH-OF-WORLD 1000)
+(define HEIGHT-OF-WORLD 200)
+(define PEAK (/ HEIGHT-OF-WORLD 4))
 (define WHEEL-RADIUS 5)
 (define WHEEL-DISTANCE (* WHEEL-RADIUS 5))
-(define Y-CAR (- HEIGHT-OF-WORLD (* 2 WHEEL-RADIUS)))
-(define SPEED WHEEL-RADIUS)
+(define Y-CAR (- (/ HEIGHT-OF-WORLD 2) (* 2 WHEEL-RADIUS)))
 
 ;; graphical constants
 (define WHEEL
@@ -35,29 +35,37 @@
 
 (define BACKGROUND (empty-scene WIDTH-OF-WORLD HEIGHT-OF-WORLD))
 
-; An AnimationState is a Number.
-; interpretation the number of clock ticks
-; since the animation started
+; A WorldState is a Number.
+; interpretation the number of pixels between
+; the left border of the scene and
+; the x-coordinate of the right-most edge of the car
 
-; render
+; reder
 ; WorldState -> Image
-; places the image of the car ws*SPEED pixels from
+; places the image of the car x pixels from
 ; the left margin of the BACKGROUND image
 (define (render ws)
-  (place-image CAR (- (* ws SPEED) (* 9/2 WHEEL-RADIUS)) Y-CAR BACKGROUND))
+  (place-image
+   CAR
+   (- ws (* 9/2 WHEEL-RADIUS))
+   (+ Y-CAR (* PEAK (sin (/ ws WHEEL-RADIUS))))
+   BACKGROUND))
 
 ; clock-tick-handler
 ; WorldState -> WorldState
-; adds 1 to ws to move the car right 
+; adds 3 to x to move the car right 
 (define (tock ws)
-  (+ ws 1))
+  (+ ws WHEEL-RADIUS))
+
+; key-stroke-handler
+; mouse-event-handler
 
 ; end?: WorldState -> Boolean
 ; when needed, big-bang evaluates (end? cw) to determine
 ; whether the program should stop
 (define (end? ws)
   (cond
-    [(> (+ (* ws SPEED) WHEEL-RADIUS) WIDTH-OF-WORLD) #true]
+    [(> (+ ws WHEEL-RADIUS) WIDTH-OF-WORLD) #true]
     [else #false]))
 
 ; WorldState -> WorldState
